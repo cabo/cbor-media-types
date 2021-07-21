@@ -1,0 +1,4 @@
+.Guardfile
+.config.ru
+*.html
+*.xml
