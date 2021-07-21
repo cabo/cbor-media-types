@@ -1,4 +1,4 @@
 .Guardfile
 .config.ru
-*.html
-*.xml
+dra*.html
+dra*.xml
