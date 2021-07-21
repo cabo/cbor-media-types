@@ -1,0 +1,460 @@
+
+
+
+
+CBOR Working Group                                            C. Bormann
+Internet-Draft                                    Universität Bremen TZI
+Intended status: Informational                              21 July 2021
+Expires: 22 January 2022
+
+
+                Defining media types with CBOR and CDDL
+             draft-bormann-cbor-defining-media-types-latest
+
+Abstract
+
+   This short draft explains how to create Internet media types (content
+   types, content formats) using CBOR, with a focus on selecting certain
+   alternatives and providing the right information to the relevant IANA
+   registration processes.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 22 January 2022.
+
+Copyright Notice
+
+   Copyright (c) 2021 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Simplified BSD License text
+   as described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction
+     1.1.  Terminology
+   2.  Using CBOR
+     2.1.  The +cbor structured syntax suffix for CBOR data items
+     2.2.  The +cbor-seq structured syntax suffix for CBOR sequences
+     2.3.  Getting the media type registration
+     2.4.  Getting a Content-Format number registration
+   3.  Using COSE
+   4.  Using CDDL
+   5.  References
+     5.1.  Normative References
+     5.2.  Informative References
+   Appendix A.  Example "application/foo+cbor" registration
+     A.1.  Registration of Media Type application/foo+cbor
+   Acknowledgements
+   Author's Address
+
+1.  Introduction
+
+   CBOR [RFC8949] is a representation format that can be used as a basis
+   for defining data formats for interchange.  Internet Media Types
+   [RFC6838] allow to give names to such formats and register them with
+   IANA, these names are then directly useful in protocols such as HTTP
+   and E-Mail.  Content-Formats (Sections 5.10.3, 5.10.4, and 12.3 of
+   [RFC7252]) provide a way to assign small numbers to combinations of
+   media-types, their parameters, and content-codings Section 8.5 of
+   [RFC7230], employing the Content-Formats subregistry of the CoRE
+   Parameters registry [IANA.core-parameters].
+
+1.1.  Terminology
+
+   Although this document is not an IETF Standards Track publication, it
+   adopts the conventions for normative language to provide clarity of
+   instructions to the implementer.  The key words "MUST", "MUST NOT",
+   "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
+   "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in BCP 14 [RFC2119]
+   [RFC8174] when, and only when, they appear in all capitals, as shown
+   here.
+
+2.  Using CBOR
+
+   In many cases, the interchange format and thus media type to be
+   defined will be a single CBOR data item: See Section 2.1 for details.
+   In some cases, a CBOR sequence [RFC8742] will be employed instead,
+   which calls for a slightly different kind of registration: See
+   Section 2.2 for details.
+
+2.1.  The +cbor structured syntax suffix for CBOR data items
+
+   Section 9.5 of [RFC8949] registers a "structured syntax suffix" of
+   "+cbor" for media types based on a single encoded CBOR data item.
+
+   The idea of a structured syntax suffix is that processors that do not
+   know the specific semantics of a cbor-based media type can still
+   process its syntactical structure once they recognize that the media
+   type name ends in "+cbor".  While the usefulness of that often does
+   not extend beyond diagnostics and debugging, this is still a valid
+   motivation.  Also, some generic processing schemes such as
+   [I-D.ietf-cbor-packed] may be directly applicable to all "+cbor"-
+   suffixed media types.
+
+   For example, SenML, in Section 6 of [RFC8428], defines a media type
+   "application/senml+cbor", among its related media types such as
+   "application/senml+json".
+
+2.2.  The +cbor-seq structured syntax suffix for CBOR sequences
+
+   Section 3 of [RFC8742] says:
+
+   |  [...] the "+cbor-seq" structured syntax suffix [...] SHOULD be
+   |  used by a media type when the result of parsing the bytes of the
+   |  media type object as a CBOR Sequence is meaningful and is at least
+   |  sometimes not just a single CBOR data item.  (Without the
+   |  qualification at the end, this sentence this sentence is trivially
+   |  true for any +cbor media type, which of course should continue to
+   |  use the "+cbor" structured syntax suffix.)
+
+   "application/missing-blocks+cbor-seq", as registered in Section 12.2
+   of [I-D.ietf-core-new-block], is an example.
+
+2.3.  Getting the media type registration
+
+   The media type registration template defined in [RFC6838] is full of
+   historic arcana that is not often fully explained in that RFC.
+   Appendix A defines a hypothetical media type application/foo+cbor.
+
+   A few aspects warrant further discussion:
+
+   *  The _Encoding considerations_ are often used in a way that is
+      different from the intention in Section 4.8 of [RFC6838], which is
+      a simple selection between "binary" and various alternatives that
+      are now all obsolete.
+
+   *  At the time of writing this, the _Fragment identifier
+      considerations_ are mostly irrelevant for CBOR; just in case we do
+      come up with a fragment identifier syntax (based on
+      [I-D.ietf-jsonpath-base]?), the boilerplate given in Appendix A
+      can be used.
+
+   *  The _Intended Usage_ is always COMMON, except for OBSOLETE or
+      LIMITED USE specifications.  The latter case can probably best be
+      elaborated as "call us before you use this".  A _Restrictions on
+      usage_ field is provided to possibly reduce the number of phone
+      calls in this case; otherwise that field is "N/A".
+
+   *  [RFC6838] has fields _Author_ and _Change Controller_. For IETF
+      documents, the latter is always the IETF, as represented by the
+      IESG (but see Appendix A).
+
+2.4.  Getting a Content-Format number registration
+
+   As per Section 12.3 of [RFC7252], a content format number
+   registration requires an existing media-type registration, which you
+   therefore need to do first (or at least in parallel).  A Content-
+   Format registration needs two additional pieces of information:
+
+   *  Is there a content-coding (erroneously called "Encoding" in
+      Section 12.3 of [RFC7252]) to be applied?  This is usually the
+      identity content-coding (usually registered as "-"), or it can be
+      a compression scheme such as "deflate" [RFC1951], "br" (brotli,
+      [RFC7932]), etc.  For CBOR data items, traditional data
+      compression does not often make a lot of sense (but it might, for
+      large data items).  An example for a content-format in the
+      Content-Formats subregistry of the CoRE Parameters registry
+      [IANA.core-parameters] that does have a non-identity content-
+      coding is 11060, which is "application/cbor" with "deflate"
+      content-coding.
+
+   *  Which number range should the registration go into?  Section 12.3
+      of [RFC7252] provides four ranges
+
+3.  Using COSE
+
+   COSE (RFC in [RFC8152], soon to be supplanted by
+   [I-D.ietf-cose-rfc8152bis-struct], [I-D.ietf-cose-rfc8152bis-algs],
+   with [I-D.ietf-cose-hash-algs]) provides cryptographic building
+   blocks that can be used in CBOR formats.  It is generally RECOMMENDED
+   to use these instead of home-brew crypto constructions whenever they
+   are applicable.  Support for libraries is one reason, but also the
+   availability of crypto agility [BCP201] through the use of the COSE
+   registries [IANA.cose].
+
+   ...
+
+   Note that COSE defines media types and content formats already.
+   These are generic formats that do not say anything further about the
+   syntax and the semantics of the CBOR data that may be contained in
+   the COSE constructs.
+
+4.  Using CDDL
+
+   Many text-based protocols used in the IETF use ABNF [RFC5234] to
+   provide formal, machine-readable definitions for their syntax.  The
+   Concise Data Definition Language (CDDL, [RFC8610]) fulfills the
+   analogous function for CBOR (as well as for JSON [RFC8259]).  A
+   specification that defines a CBOR (or JSON) based media type SHOULD
+   provide a CDDL specification, which is often _very_ short (compare
+   Figure 1 of [RFC8710], as reproduced below).
+
+   multipart-core = [* multipart-part]
+   multipart-part = (type: uint .size 2, part: bytes / null)
+
+      Figure 1: Example CDDL specification as per Figure 1 of RFC 8710
+
+   See Appendix F of [RFC8610] for a tool that can be used in
+   validating, as well as checking for the correct meaning, a CDDL
+   snippet like the above.
+
+   ...
+
+5.  References
+
+5.1.  Normative References
+
+   [BCP201]   Housley, R., "Guidelines for Cryptographic Algorithm
+              Agility and Selecting Mandatory-to-Implement Algorithms",
+              BCP 201, RFC 7696, November 2015.
+
+              <https://www.rfc-editor.org/info/bcp201>
+
+   [I-D.ietf-cose-hash-algs]
+              Schaad, J., "CBOR Object Signing and Encryption (COSE):
+              Hash Algorithms", Work in Progress, Internet-Draft, draft-
+              ietf-cose-hash-algs-09, 14 September 2020,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-cose-
+              hash-algs-09>.
+
+   [I-D.ietf-cose-rfc8152bis-algs]
+              Schaad, J., "CBOR Object Signing and Encryption (COSE):
+              Initial Algorithms", Work in Progress, Internet-Draft,
+              draft-ietf-cose-rfc8152bis-algs-12, 24 September 2020,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-cose-
+              rfc8152bis-algs-12>.
+
+   [I-D.ietf-cose-rfc8152bis-struct]
+              Schaad, J., "CBOR Object Signing and Encryption (COSE):
+              Structures and Process", Work in Progress, Internet-Draft,
+              draft-ietf-cose-rfc8152bis-struct-15, 1 February 2021,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-cose-
+              rfc8152bis-struct-15>.
+
+   [I-D.ietf-jsonpath-base]
+              Gössner, S., Normington, G., and C. Bormann, "JSONPath:
+              Query expressions for JSON", Work in Progress, Internet-
+              Draft, draft-ietf-jsonpath-base-01, 8 July 2021,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-
+              jsonpath-base-01>.
+
+   [IANA.core-parameters]
+              IANA, "Constrained RESTful Environments (CoRE)
+              Parameters",
+              <http://www.iana.org/assignments/core-parameters>.
+
+   [IANA.cose]
+              IANA, "CBOR Object Signing and Encryption (COSE)",
+              <http://www.iana.org/assignments/cose>.
+
+   [IANA.media-types]
+              IANA, "Media Types",
+              <http://www.iana.org/assignments/media-types>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://datatracker.ietf.org/doc/html/rfc2119>.
+
+   [RFC5234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, RFC 5234,
+              DOI 10.17487/RFC5234, January 2008,
+              <https://datatracker.ietf.org/doc/html/rfc5234>.
+
+   [RFC6838]  Freed, N., Klensin, J., and T. Hansen, "Media Type
+              Specifications and Registration Procedures", BCP 13,
+              RFC 6838, DOI 10.17487/RFC6838, January 2013,
+              <https://datatracker.ietf.org/doc/html/rfc6838>.
+
+   [RFC7230]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Message Syntax and Routing",
+              RFC 7230, DOI 10.17487/RFC7230, June 2014,
+              <https://datatracker.ietf.org/doc/html/rfc7230>.
+
+   [RFC7252]  Shelby, Z., Hartke, K., and C. Bormann, "The Constrained
+              Application Protocol (CoAP)", RFC 7252,
+              DOI 10.17487/RFC7252, June 2014,
+              <https://datatracker.ietf.org/doc/html/rfc7252>.
+
+   [RFC8152]  Schaad, J., "CBOR Object Signing and Encryption (COSE)",
+              RFC 8152, DOI 10.17487/RFC8152, July 2017,
+              <https://datatracker.ietf.org/doc/html/rfc8152>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://datatracker.ietf.org/doc/html/rfc8174>.
+
+   [RFC8259]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", STD 90, RFC 8259,
+              DOI 10.17487/RFC8259, December 2017,
+              <https://datatracker.ietf.org/doc/html/rfc8259>.
+
+   [RFC8610]  Birkholz, H., Vigano, C., and C. Bormann, "Concise Data
+              Definition Language (CDDL): A Notational Convention to
+              Express Concise Binary Object Representation (CBOR) and
+              JSON Data Structures", RFC 8610, DOI 10.17487/RFC8610,
+              June 2019,
+              <https://datatracker.ietf.org/doc/html/rfc8610>.
+
+   [RFC8742]  Bormann, C., "Concise Binary Object Representation (CBOR)
+              Sequences", RFC 8742, DOI 10.17487/RFC8742, February 2020,
+              <https://datatracker.ietf.org/doc/html/rfc8742>.
+
+   [RFC8949]  Bormann, C. and P. Hoffman, "Concise Binary Object
+              Representation (CBOR)", STD 94, RFC 8949,
+              DOI 10.17487/RFC8949, December 2020,
+              <https://datatracker.ietf.org/doc/html/rfc8949>.
+
+5.2.  Informative References
+
+   [I-D.ietf-cbor-packed]
+              Bormann, C., "Packed CBOR", Work in Progress, Internet-
+              Draft, draft-ietf-cbor-packed-02, 9 February 2021,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-cbor-
+              packed-02>.
+
+   [I-D.ietf-core-new-block]
+              Boucadair, M. and J. Shallow, "Constrained Application
+              Protocol (CoAP) Block-Wise Transfer Options Supporting
+              Robust Transmission", Work in Progress, Internet-Draft,
+              draft-ietf-core-new-block-14, 26 May 2021,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-core-
+              new-block-14>.
+
+   [RFC1951]  Deutsch, P., "DEFLATE Compressed Data Format Specification
+              version 1.3", RFC 1951, DOI 10.17487/RFC1951, May 1996,
+              <https://datatracker.ietf.org/doc/html/rfc1951>.
+
+   [RFC7932]  Alakuijala, J. and Z. Szabadka, "Brotli Compressed Data
+              Format", RFC 7932, DOI 10.17487/RFC7932, July 2016,
+              <https://datatracker.ietf.org/doc/html/rfc7932>.
+
+   [RFC8428]  Jennings, C., Shelby, Z., Arkko, J., Keranen, A., and C.
+              Bormann, "Sensor Measurement Lists (SenML)", RFC 8428,
+              DOI 10.17487/RFC8428, August 2018,
+              <https://datatracker.ietf.org/doc/html/rfc8428>.
+
+   [RFC8710]  Fossati, T., Hartke, K., and C. Bormann, "Multipart
+              Content-Format for the Constrained Application Protocol
+              (CoAP)", RFC 8710, DOI 10.17487/RFC8710, February 2020,
+              <https://datatracker.ietf.org/doc/html/rfc8710>.
+
+   [RFC9000]  Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
+              Multiplexed and Secure Transport", RFC 9000,
+              DOI 10.17487/RFC9000, May 2021,
+              <https://datatracker.ietf.org/doc/html/rfc9000>.
+
+Appendix A.  Example "application/foo+cbor" registration
+
+   This appendix contains an example registration template for a
+   hypothetical "application/foo+cbor" media type (fashioned after that
+   in [RFC8710]), in a form that can be pasted into a kramdown-rfc
+   source file.
+
+   Note that the contact information and the change controller
+   information is not very well defined; this may get some comments
+   during media type registration review and IETF last call.  It may
+   seem obvious to include the WG name in the contact information, but
+   that is likely to shut down before the specification becomes
+   irrelevant.  Recent RFCs are confused whether the change controller
+   should be simply "IETF" or simply "IESG", or "IESG" plus the iesg
+   mail address iesg@ietf.org (mailto:iesg@ietf.org).  [RFC9000] is an
+   interesting counter-example, as it seems to assume a perpetual WG:
+
+   |  All registrations in this document are assigned a permanent status
+   |  and list a change controller of the IETF and a contact of the QUIC
+   |  Working Group (quic@ietf.org).
+
+   [RFC8949] probably has the most useful solution for the contact
+   information, assuming that the area ART (or at least its mail
+   address) will be around for a while:
+
+   |  Contact:  IETF CBOR Working Group (cbor@ietf.org) or IETF
+   |     Applications and Real-Time Area (art@ietf.org)
+
+A.1.  Registration of Media Type application/foo+cbor
+
+   IANA is requested to register the following media type [RFC6838]:
+
+   Type name:  application
+
+   Subtype name:  foo+cbor
+
+   Required parameters:  N/A
+
+   Optional parameters:  N/A
+
+   Encoding considerations:  binary
+
+   Security considerations:  See the Security Considerations section of
+      RFCXXXX.
+
+   Interoperability considerations:  N/A
+
+   Published specification:  RFCXXXX
+
+   Applications that use this media type:  (*short description*)
+
+   Fragment identifier considerations:  The syntax and semantics of
+      fragment identifiers specified for application/multipart-core are
+      as specified for application/cbor.  (At publication of this
+      document, there is no fragment identification syntax defined for
+      application/cbor.)
+
+   Additional information:  Deprecated alias names for this type:  N/A
+
+                            Magic number(s):  N/A
+
+                            File extension(s):  N/A
+
+                            Macintosh file type code(s):  N/A
+
+   Person & email address to contact for further information:
+   iesg@ietf.org
+
+   Intended usage:  COMMON
+
+   Restrictions on usage:  N/A
+
+   Author:  FOO WG
+
+   Change controller:  IESG
+
+   Provisional registration? (standards tree only):  no
+
+Acknowledgements
+
+   ...
+
+Author's Address
+
+   Carsten Bormann
+   Universität Bremen TZI
+   Postfach 330440
+   D-28359 Bremen
+   Germany
+
+   Phone: +49-421-218-63921
+   Email: cabo@tzi.org
