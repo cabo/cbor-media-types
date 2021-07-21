@@ -18,6 +18,18 @@ Abstract
    alternatives and providing the right information to the relevant IANA
    registration processes.
 
+Discussion Venues
+
+   This note is to be removed before publishing as an RFC.
+
+   Discussion of this document takes place on the Concise Binary Object
+   Representation Maintenance and Extensions Working Group mailing list
+   (cbor@ietf.org), which is archived at https://www.ietf.org/mail-
+   archive/web/cbor/current/maillist.html.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/cabo/cbor-media-types.
+
 Status of This Memo
 
    This Internet-Draft is submitted in full conformance with the
